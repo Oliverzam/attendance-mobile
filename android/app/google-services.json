@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "836688939884",
+    "project_id": "pozo-tesis-app",
+    "storage_bucket": "pozo-tesis-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:836688939884:android:126a561d7b1191922c0149",
+        "android_client_info": {
+          "package_name": "com.example.hola"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5ynWclV76gc8q2RsyX_7aOU-F6Slp_VU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
