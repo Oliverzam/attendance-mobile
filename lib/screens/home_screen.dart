@@ -1,9 +1,10 @@
 // lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart'; // 👈 agrega
+import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
 import '../services/api_service.dart';
 import '../services/notification_service.dart';
+import '../theme/app_theme.dart';
 import 'login_screen.dart';
 import '../tabs/home_tab.dart';
 import '../tabs/asistencia_tab.dart';
@@ -30,7 +31,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   int _currentIndex = 0;
-  int _noLeidas = 0;
+  int _noLeidas    = 0;
 
   @override
   void initState() {
@@ -39,13 +40,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     NotificationService.authToken = widget.token;
     _contarNoLeidas();
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      _contarNoLeidas();
-    });
-
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      _contarNoLeidas();
-    });
+    FirebaseMessaging.onMessage.listen((_) => _contarNoLeidas());
+    FirebaseMessaging.onMessageOpenedApp.listen((_) => _contarNoLeidas());
   }
 
   @override
@@ -56,9 +52,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _contarNoLeidas();
-    }
+    if (state == AppLifecycleState.resumed) _contarNoLeidas();
   }
 
   Future<void> _contarNoLeidas() async {
@@ -81,78 +75,82 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> tabs = [
-      HomeTab(
-        empleadoData: widget.empleadoData,
-        rol: widget.rol,
-        token: widget.token,
-        onNavegar: (index) => setState(() => _currentIndex = index), // 👈 nuevo
-      ),
-      AsistenciaTab(empleadoId: widget.empleadoData['id']),
-      EventosTab(empleadoId: widget.empleadoData['id']),
-      ReportesTab(token: widget.token),
-      NotificacionesTab(
-        token: widget.token,
-        empleadoId: widget.empleadoData['id'],
-        onNotificacionesLeidas: _contarNoLeidas,
-      ),
-    ];
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, _) {
+        final isDark =
+            themeProvider.themeMode == ThemeMode.dark ||
+            (themeProvider.themeMode == ThemeMode.system &&
+                MediaQuery.of(context).platformBrightness == Brightness.dark);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Hola ${widget.empleadoData['nombre']}'),
-        actions: [
-          // 👈 agrega este Consumer
-          Consumer<ThemeProvider>(
-            builder: (context, themeProvider, _) {
-              final isDark =
-                  themeProvider.themeMode == ThemeMode.dark ||
-                  (themeProvider.themeMode == ThemeMode.system &&
-                      MediaQuery.of(context).platformBrightness ==
-                          Brightness.dark);
-              return IconButton(
-                icon: Icon(
-                  isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-                ),
-                onPressed: () => themeProvider.toggleTheme(!isDark),
-              );
-            },
+        final List<Widget> tabs = [
+          HomeTab(
+            empleadoData: widget.empleadoData,
+            rol:          widget.rol,
+            token:        widget.token,
+            noLeidas:     _noLeidas,
+            onNavegar:    (i) => setState(() => _currentIndex = i),
+            onLogout:     handleLogout,
+            onToggleTheme: () => themeProvider.toggleTheme(!isDark),
+            isDark:       isDark,
           ),
-          IconButton(icon: const Icon(Icons.logout), onPressed: handleLogout),
-        ],
-      ),
-      body: tabs[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        type: BottomNavigationBarType.fixed,
-        onTap: (index) {
-          setState(() => _currentIndex = index);
-          if (index == 4) _contarNoLeidas();
-        },
-        items: [
-          const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.check_circle),
-            label: 'Asistencia',
+          AsistenciaTab(empleadoId: widget.empleadoData['id']),
+          EventosTab(empleadoId: widget.empleadoData['id']),
+          ReportesTab(token: widget.token),
+          NotificacionesTab(
+            token:                  widget.token,
+            empleadoId:             widget.empleadoData['id'],
+            onNotificacionesLeidas: _contarNoLeidas,
           ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.event),
-            label: 'Eventos',
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Reportes',
-          ),
-          BottomNavigationBarItem(
-            label: 'Notificaciones',
-            icon: Badge(
-              isLabelVisible: _noLeidas > 0,
-              label: Text('$_noLeidas'),
-              child: const Icon(Icons.notifications),
+        ];
+
+        return Scaffold(
+          body: tabs[_currentIndex],
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex:        _currentIndex,
+            type:                BottomNavigationBarType.fixed,
+            selectedItemColor:   const Color(0xFF185FA5),
+            unselectedItemColor: const Color(0xFFB4B2A9),
+            backgroundColor:     isDark ? AppTheme.cardDark : Colors.white,
+            elevation:           8,
+            selectedLabelStyle:   const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 11,
             ),
+            unselectedLabelStyle: const TextStyle(fontSize: 11),
+            onTap: (i) {
+              setState(() => _currentIndex = i);
+              if (i == 4) _contarNoLeidas();
+            },
+            items: [
+              const BottomNavigationBarItem(
+                icon:  Icon(Icons.home_rounded),
+                label: 'Home',
+              ),
+              const BottomNavigationBarItem(
+                icon:  Icon(Icons.fingerprint_rounded),
+                label: 'Asistencia',
+              ),
+              const BottomNavigationBarItem(
+                icon:  Icon(Icons.event_rounded),
+                label: 'Eventos',
+              ),
+              const BottomNavigationBarItem(
+                icon:  Icon(Icons.bar_chart_rounded),
+                label: 'Reportes',
+              ),
+              BottomNavigationBarItem(
+                label: 'Notif.',
+                icon: Badge(
+                  isLabelVisible: _noLeidas > 0,
+                  label: Text('$_noLeidas'),
+                  backgroundColor: Colors.red,
+                  child: const Icon(Icons.notifications_rounded),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

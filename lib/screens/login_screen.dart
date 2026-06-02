@@ -12,9 +12,14 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController cedulaCtrl = TextEditingController();
-  final TextEditingController passCtrl = TextEditingController();
-  bool loading = false;
+  final TextEditingController passCtrl   = TextEditingController();
+  bool loading      = false;
   bool _obscurePass = true;
+
+  static const _navy      = Color(0xFF0C1A3A);
+  static const _blue      = Color(0xFF185FA5);
+  static const _bgGray    = Color(0xFFF4F6FA);
+  static const _borderGray = Color(0xFFDDE2EE);
 
   void handleLogin() async {
     setState(() => loading = true);
@@ -26,8 +31,8 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(
           builder: (_) => HomeScreen(
             empleadoData: data['empleado'],
-            rol: data['rol'],
-            token: data['token'],
+            rol:          data['rol'],
+            token:        data['token'],
           ),
         ),
       );
@@ -46,239 +51,313 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: isDark
-                ? [AppTheme.primaryDark, AppTheme.backgroundDark]
-                : [AppTheme.primary, const Color(0xFF1A4A9C)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // ======== Logo ========
-                  Container(
-                    width: 110,
-                    height: 110,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppTheme.secondary, width: 3),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppTheme.secondary.withOpacity(0.35),
-                          blurRadius: 20,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: ClipOval(
-                      child: Image.asset('assets/logo.png', fit: BoxFit.cover),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
+      backgroundColor: _navy,
+      body: Stack(
+        children: [
+          Container(color: _navy),
 
-                  // ======== Nombre institución ========
-                  const Text(
-                    'GAD Municipal',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 16,
-                      letterSpacing: 2,
-                    ),
-                  ),
-                  const Text(
-                    'Cotacachi',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    width: 60,
-                    height: 3,
-                    decoration: BoxDecoration(
-                      color: AppTheme.secondary,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(height: 40),
+          SafeArea(
+            child: Column(
+              children: [
 
-                  // ======== Card formulario ========
-                  Container(
-                    padding: const EdgeInsets.all(28),
-                    decoration: BoxDecoration(
-                      color: isDark ? AppTheme.cardDark : Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 30,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
+                // ══ SECCIÓN SUPERIOR (40%) — logo + branding ══════════
+                Expanded(
+                  flex: 40,
+                  child: Center(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          'Iniciar Sesión',
+                        // Logo 64×64 con huella
+                        Container(
+                          width: 64,
+                          height: 64,
+                          decoration: BoxDecoration(
+                            color: _blue,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: _blue.withOpacity(0.45),
+                                blurRadius: 24,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.fingerprint,
+                            color: Colors.white,
+                            size: 36,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        const Text(
+                          'OliverTech',
                           style: TextStyle(
+                            color: Colors.white,
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : AppTheme.primary,
+                            letterSpacing: 0.5,
                           ),
                         ),
+                        const SizedBox(height: 4),
+
                         Text(
-                          'Sistema de Registro de Asistencia',
+                          'Sistema de Control de Asistencia',
                           style: TextStyle(
+                            color: Colors.white.withOpacity(0.60),
                             fontSize: 12,
-                            color: isDark ? Colors.white54 : Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(height: 28),
-
-                        // Campo cédula
-                        TextField(
-                          controller: cedulaCtrl,
-                          enableSuggestions: false,
-                          autocorrect: false,
-                          keyboardType: TextInputType.number,
-                          style: TextStyle(
-                            color: isDark ? Colors.white : AppTheme.primary,
-                          ),
-                          decoration: InputDecoration(
-                            labelText: 'Cédula',
-                            prefixIcon: Icon(
-                              Icons.badge_outlined,
-                              color: AppTheme.primary,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                color: AppTheme.primary,
-                                width: 2,
-                              ),
-                            ),
-                            labelStyle: TextStyle(
-                              color: isDark ? Colors.white54 : Colors.grey,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Campo contraseña
-                        TextField(
-                          controller: passCtrl,
-                          enableSuggestions: false,
-                          autocorrect: false,
-                          obscureText: _obscurePass,
-                          style: TextStyle(
-                            color: isDark ? Colors.white : AppTheme.primary,
-                          ),
-                          decoration: InputDecoration(
-                            labelText: 'Contraseña',
-                            prefixIcon: Icon(
-                              Icons.lock_outline,
-                              color: AppTheme.primary,
-                            ),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscurePass
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                                color: Colors.grey,
-                              ),
-                              onPressed: () =>
-                                  setState(() => _obscurePass = !_obscurePass),
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                color: AppTheme.primary,
-                                width: 2,
-                              ),
-                            ),
-                            labelStyle: TextStyle(
-                              color: isDark ? Colors.white54 : Colors.grey,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 28),
-
-                        // Botón ingresar
-                        SizedBox(
-                          width: double.infinity,
-                          height: 50,
-                          child: ElevatedButton(
-                            onPressed: loading ? null : handleLogin,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.secondary,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 4,
-                              shadowColor: AppTheme.secondary.withOpacity(0.4),
-                            ),
-                            child: loading
-                                ? const SizedBox(
-                                    width: 24,
-                                    height: 24,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2.5,
-                                    ),
-                                  )
-                                : const Text(
-                                    'Ingresar',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 1,
-                                    ),
-                                  ),
+                            letterSpacing: 0.3,
                           ),
                         ),
                       ],
                     ),
                   ),
+                ),
 
-                  const SizedBox(height: 32),
+                // ══ SECCIÓN INFERIOR (60%) — formulario ═══════════════
+                Expanded(
+                  flex: 60,
+                  child: Container(
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      color: _bgGray,
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(28),
+                      ),
+                    ),
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(28, 20, 28, 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
 
-                  // ======== Footer ========
-                  const Text(
-                    '© 2025 GAD de Cotacachi',
-                    style: TextStyle(color: Colors.white38, fontSize: 11),
+                          // Título
+                          const Text(
+                            'Bienvenido',
+                            style: TextStyle(
+                              color: _navy,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            'Ingresa tus credenciales para continuar',
+                            style: TextStyle(
+                              color: Colors.grey[500],
+                              fontSize: 12,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // ── Campo Cédula ─────────────────────────────
+                          const Text(
+                            'CÉDULA',
+                            style: TextStyle(
+                              color: _blue,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          TextField(
+                            controller: cedulaCtrl,
+                            keyboardType: TextInputType.number,
+                            enableSuggestions: false,
+                            autocorrect: false,
+                            style: const TextStyle(color: _navy, fontSize: 15),
+                            decoration: InputDecoration(
+                              hintText: 'Tu número de cédula',
+                              hintStyle: TextStyle(
+                                color: Colors.grey[400],
+                                fontSize: 14,
+                              ),
+                              prefixIcon: const Icon(
+                                Icons.badge_outlined,
+                                color: _blue,
+                                size: 20,
+                              ),
+                              filled: true,
+                              fillColor: Colors.white,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 11,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: _borderGray,
+                                  width: 1.5,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: _blue,
+                                  width: 1.5,
+                                ),
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          // ── Campo Contraseña ─────────────────────────
+                          const Text(
+                            'CONTRASEÑA',
+                            style: TextStyle(
+                              color: _blue,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          TextField(
+                            controller: passCtrl,
+                            obscureText: _obscurePass,
+                            enableSuggestions: false,
+                            autocorrect: false,
+                            style: const TextStyle(color: _navy, fontSize: 15),
+                            decoration: InputDecoration(
+                              hintText: 'Tu contraseña',
+                              hintStyle: TextStyle(
+                                color: Colors.grey[400],
+                                fontSize: 14,
+                              ),
+                              prefixIcon: const Icon(
+                                Icons.lock_outline,
+                                color: _blue,
+                                size: 20,
+                              ),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscurePass
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
+                                  color: Colors.grey[400],
+                                  size: 20,
+                                ),
+                                onPressed: () =>
+                                    setState(() => _obscurePass = !_obscurePass),
+                              ),
+                              filled: true,
+                              fillColor: Colors.white,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 11,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: _borderGray,
+                                  width: 1.5,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: _blue,
+                                  width: 1.5,
+                                ),
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
+                          // ── Botón Iniciar sesión ─────────────────────
+                          SizedBox(
+                            width: double.infinity,
+                            height: 48,
+                            child: ElevatedButton(
+                              onPressed: loading ? null : handleLogin,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _blue,
+                                foregroundColor: Colors.white,
+                                disabledBackgroundColor: _blue.withOpacity(0.6),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                elevation: 0,
+                                padding: const EdgeInsets.symmetric(vertical: 13),
+                              ),
+                              child: loading
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2.5,
+                                      ),
+                                    )
+                                  : const Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          'Iniciar sesión',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                        SizedBox(width: 8),
+                                        Icon(
+                                          Icons.arrow_forward_rounded,
+                                          size: 18,
+                                        ),
+                                      ],
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+
+                          // ── Link olvidé contraseña ───────────────────
+                          Center(
+                            child: TextButton(
+                              onPressed: () {},
+                              style: TextButton.styleFrom(
+                                foregroundColor: _blue,
+                              ),
+                              child: const Text(
+                                '¿Olvidaste tu contraseña?',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+
+                          // ── Footer ───────────────────────────────────
+                          Center(
+                            child: Text(
+                              'OliverTech © 2026',
+                              style: TextStyle(
+                                color: Colors.grey[400],
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  const Text(
-                    'Todos los derechos reservados',
-                    style: TextStyle(color: Colors.white38, fontSize: 11),
-                  ),
-                ],
-              ),
+                ),
+
+              ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }

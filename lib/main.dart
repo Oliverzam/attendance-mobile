@@ -58,7 +58,7 @@ class _MyAppState extends State<MyApp> {
     final themeProvider = context.watch<ThemeProvider>(); // 👈 agrega
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'GAD Cotacachi',
+      title: 'OliverTech',
       theme: AppTheme.theme,
       darkTheme: AppTheme.darkTheme, // 👈 agrega
       themeMode: themeProvider.themeMode, // 👈 agrega

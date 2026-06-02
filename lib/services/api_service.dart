@@ -30,7 +30,7 @@ class ApiService {
       final resp = await http.post(
         uri,
         headers: headers, // usamos la propiedad headers
-        body: jsonEncode({'cedula': cedula, 'password': password}),
+        body: jsonEncode({'identificador': cedula, 'password': password}),
       );
 
       if (resp.statusCode == 200) {

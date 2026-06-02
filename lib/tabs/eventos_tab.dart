@@ -7,10 +7,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 
-// Colores institucionales coherentes con el resto de la app
-const _kPrimary = Color(0xFF4361EE);
+const _kPrimary = Color(0xFF185FA5);
 const _kEntrada = Color(0xFF10B981);
-const _kSalida = Color(0xFFEF4444);
+const _kSalida  = Color(0xFFEF4444);
+const _kNavy    = Color(0xFF0C1A3A);
 
 class Evento {
   final int empleadoEventoId;
@@ -45,13 +45,13 @@ class Evento {
       empleadoEventoId:
           json['empleado_evento_id'] ?? json['emplado_evento_id'] ?? 0,
       empleadoId: json['empleado_id'] ?? 0,
-      eventoId: json['evento_id'] ?? 0,
-      titulo: json['titulo'] ?? '',
-      fecha: json['fecha'] ?? '',
-      hora: json['hora'] ?? '',
-      lugar: json['lugar'] ?? '',
-      latitud: json['latitud']?.toString() ?? '0',
-      longitud: json['longitud']?.toString() ?? '0',
+      eventoId:   json['evento_id']   ?? 0,
+      titulo:     json['titulo']      ?? '',
+      fecha:      json['fecha']       ?? '',
+      hora:       json['hora']        ?? '',
+      lugar:      json['lugar']       ?? '',
+      latitud:    json['latitud']?.toString()  ?? '0',
+      longitud:   json['longitud']?.toString() ?? '0',
     );
   }
 
@@ -67,10 +67,10 @@ class EventosTab extends StatefulWidget {
 }
 
 class _EventosTabState extends State<EventosTab> {
-  List<Evento> todosLosEventos = [];
+  List<Evento> todosLosEventos        = [];
   List<Evento> eventosDiaSeleccionado = [];
   bool isLoading = true;
-  DateTime _focusedDay = DateTime.now();
+  DateTime  _focusedDay  = DateTime.now();
   DateTime? _selectedDay;
   Map<int, int> eventoAsistenciaId = {};
 
@@ -84,18 +84,18 @@ class _EventosTabState extends State<EventosTab> {
   List<Evento> _getEventosPorDia(DateTime dia) {
     return todosLosEventos.where((e) {
       final fecha = e.fechaDateTime;
-      return fecha.year == dia.year &&
-          fecha.month == dia.month &&
-          fecha.day == dia.day;
+      return fecha.year  == dia.year  &&
+             fecha.month == dia.month &&
+             fecha.day   == dia.day;
     }).toList();
   }
 
   Future<bool> _asegurarPermisosUbicacion() async {
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Activa el GPS')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Activa el GPS')),
+      );
       return false;
     }
     LocationPermission perm = await Geolocator.checkPermission();
@@ -118,9 +118,9 @@ class _EventosTabState extends State<EventosTab> {
         timeLimit: const Duration(seconds: 15),
       );
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error al obtener ubicación: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al obtener ubicación: $e')),
+      );
       return null;
     }
   }
@@ -131,8 +131,8 @@ class _EventosTabState extends State<EventosTab> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _MapaModal(
-        latitud: double.parse(evento.latitud),
-        longitud: double.parse(evento.longitud),
+        latitud:     double.parse(evento.latitud),
+        longitud:    double.parse(evento.longitud),
         nombreLugar: evento.lugar,
       ),
     );
@@ -149,11 +149,11 @@ class _EventosTabState extends State<EventosTab> {
         Uri.parse('${ApiService.baseUrl}/api/asistencias/entrada'),
         headers: ApiService.headers,
         body: jsonEncode({
-          "eventos_id": evento.eventoId,
-          "empleado_evento_id": evento.empleadoEventoId,
-          "tipo": "evento",
-          "latitud_registro": posicion.latitude.toString(),
-          "longitud_registro": posicion.longitude.toString(),
+          "eventos_id":          evento.eventoId,
+          "empleado_evento_id":  evento.empleadoEventoId,
+          "tipo":                "evento",
+          "latitud_registro":    posicion.latitude.toString(),
+          "longitud_registro":   posicion.longitude.toString(),
         }),
       );
 
@@ -179,9 +179,9 @@ class _EventosTabState extends State<EventosTab> {
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error de conexión: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error de conexión: $e')),
+      );
     }
   }
 
@@ -196,7 +196,7 @@ class _EventosTabState extends State<EventosTab> {
         Uri.parse('${ApiService.baseUrl}/api/asistencias/salida'),
         headers: ApiService.headers,
         body: jsonEncode({
-          "latitud_registro": posicion.latitude.toString(),
+          "latitud_registro":  posicion.latitude.toString(),
           "longitud_registro": posicion.longitude.toString(),
         }),
       );
@@ -219,20 +219,20 @@ class _EventosTabState extends State<EventosTab> {
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error de conexión: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error de conexión: $e')),
+      );
     }
   }
 
-  void fetchEventos() async {
+  Future<void> fetchEventos() async {
     try {
       final results = await Future.wait([
         ApiService.getEventosEmpleado(widget.empleadoId),
         ApiService.getAsistenciaActiva(),
       ]);
 
-      final data = results[0] as List;
+      final data   = results[0] as List;
       final activa = results[1] as Map<String, dynamic>?;
 
       setState(() {
@@ -254,219 +254,292 @@ class _EventosTabState extends State<EventosTab> {
     }
   }
 
+  // ================= BUILD =================
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     if (isLoading)
       return const Center(child: CircularProgressIndicator(color: _kPrimary));
 
+    final topPad = MediaQuery.of(context).padding.top;
+
     return Column(
       children: [
-        // ======== Calendario ========
-        TableCalendar(
-          firstDay: DateTime.utc(2024, 1, 1),
-          lastDay: DateTime.utc(2027, 12, 31),
-          focusedDay: _focusedDay,
-          selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-          eventLoader: _getEventosPorDia,
-          calendarStyle: CalendarStyle(
-            // ✅ marcador de eventos
-            markerDecoration: const BoxDecoration(
-              color: _kPrimary,
-              shape: BoxShape.circle,
-            ),
-            // ✅ día seleccionado
-            selectedDecoration: const BoxDecoration(
-              color: _kPrimary,
-              shape: BoxShape.circle,
-            ),
-            // ✅ hoy
-            todayDecoration: BoxDecoration(
-              color: _kPrimary.withOpacity(0.4),
-              shape: BoxShape.circle,
-            ),
-            // ✅ textos coherentes con el tema
-            defaultTextStyle: TextStyle(color: colorScheme.onSurface),
-            weekendTextStyle: TextStyle(
-              color: colorScheme.onSurface.withOpacity(0.6),
-            ),
-            outsideTextStyle: TextStyle(
-              color: colorScheme.onSurface.withOpacity(0.3),
-            ),
-            selectedTextStyle: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-            ),
-            todayTextStyle: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          headerStyle: HeaderStyle(
-            formatButtonVisible: false,
-            titleCentered: true,
-            titleTextStyle: TextStyle(
-              color: colorScheme.onSurface,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-            leftChevronIcon: Icon(
-              Icons.chevron_left,
-              color: colorScheme.onSurface,
-            ),
-            rightChevronIcon: Icon(
-              Icons.chevron_right,
-              color: colorScheme.onSurface,
-            ),
-          ),
-          daysOfWeekStyle: DaysOfWeekStyle(
-            weekdayStyle: TextStyle(
-              color: colorScheme.onSurface.withOpacity(0.7),
-              fontWeight: FontWeight.w600,
-            ),
-            weekendStyle: TextStyle(
-              color: colorScheme.onSurface.withOpacity(0.4),
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          onDaySelected: (selectedDay, focusedDay) {
-            setState(() {
-              _selectedDay = selectedDay;
-              _focusedDay = focusedDay;
-              eventosDiaSeleccionado = _getEventosPorDia(selectedDay);
-            });
-          },
-        ),
-
-        Divider(color: Theme.of(context).dividerColor),
-
-        // ======== Lista eventos ========
+        _buildHeader(context, topPad),
         Expanded(
-          child: eventosDiaSeleccionado.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.event_busy_rounded,
-                        size: 64,
-                        color: colorScheme.onSurface.withOpacity(0.2),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'No hay eventos este día',
-                        style: TextStyle(
-                          color: colorScheme.onSurface.withOpacity(0.4),
-                          fontSize: 15,
+          child: Container(
+            color: const Color(0xFFF4F6FA),
+            child: RefreshIndicator(
+              onRefresh: fetchEventos,
+              color: _kPrimary,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionHeader(context),
+                    if (eventosDiaSeleccionado.isEmpty)
+                      _buildEmptyState(context)
+                    else
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                        child: Column(
+                          children: eventosDiaSeleccionado
+                              .map((e) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 12),
+                                    child: _buildEventoCard(context, e),
+                                  ))
+                              .toList(),
                         ),
                       ),
-                    ],
-                  ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: eventosDiaSeleccionado.length,
-                  itemBuilder: (context, index) {
-                    final evento = eventosDiaSeleccionado[index];
-                    return _buildEventoCard(
-                      context,
-                      evento,
-                      isDark,
-                      colorScheme,
-                    );
-                  },
+                  ],
                 ),
+              ),
+            ),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildEventoCard(
-    BuildContext context,
-    Evento evento,
-    bool isDark,
-    ColorScheme colorScheme,
-  ) {
+  // ================= HEADER CON CALENDARIO =================
+  Widget _buildHeader(BuildContext context, double topPad) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor, // ✅
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).dividerColor), // ✅
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.2 : 0.06),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+      color: _kNavy,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: topPad),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 12, 20, 8),
+            child: Text(
+              'Mis Eventos',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 14),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: TableCalendar(
+                firstDay: DateTime.utc(2024, 1, 1),
+                lastDay:  DateTime.utc(2027, 12, 31),
+                focusedDay: _focusedDay,
+                selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                eventLoader: _getEventosPorDia,
+                calendarStyle: CalendarStyle(
+                  markerDecoration: const BoxDecoration(
+                    color: Color(0xFFEF9F27),
+                    shape: BoxShape.circle,
+                  ),
+                  selectedDecoration: const BoxDecoration(
+                    color: _kPrimary,
+                    shape: BoxShape.circle,
+                  ),
+                  todayDecoration: BoxDecoration(
+                    color: _kPrimary.withOpacity(0.35),
+                    shape: BoxShape.circle,
+                  ),
+                  defaultTextStyle:  TextStyle(color: Colors.white.withOpacity(0.85)),
+                  weekendTextStyle:  TextStyle(color: Colors.white.withOpacity(0.65)),
+                  outsideTextStyle:  TextStyle(color: Colors.white.withOpacity(0.25)),
+                  disabledTextStyle: TextStyle(color: Colors.white.withOpacity(0.20)),
+                  selectedTextStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                  todayTextStyle:    const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                ),
+                headerStyle: HeaderStyle(
+                  formatButtonVisible: false,
+                  titleCentered: true,
+                  headerPadding: const EdgeInsets.symmetric(vertical: 8),
+                  titleTextStyle: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  leftChevronIcon:  Icon(Icons.chevron_left,  color: Colors.white.withOpacity(0.8)),
+                  rightChevronIcon: Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.8)),
+                ),
+                daysOfWeekStyle: DaysOfWeekStyle(
+                  weekdayStyle: TextStyle(
+                    color: Colors.white.withOpacity(0.4),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                  weekendStyle: TextStyle(
+                    color: Colors.white.withOpacity(0.3),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                ),
+                onDaySelected: (selectedDay, focusedDay) {
+                  setState(() {
+                    _selectedDay = selectedDay;
+                    _focusedDay  = focusedDay;
+                    eventosDiaSeleccionado = _getEventosPorDia(selectedDay);
+                  });
+                },
+              ),
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  // ================= HEADER DE SECCIÓN =================
+  Widget _buildSectionHeader(BuildContext context) {
+    final dia = _selectedDay ?? DateTime.now();
+    const meses = [
+      'enero','febrero','marzo','abril','mayo','junio',
+      'julio','agosto','septiembre','octubre','noviembre','diciembre',
+    ];
+    final fechaStr = '${dia.day} de ${meses[dia.month - 1]} de ${dia.year}';
+    final count = eventosDiaSeleccionado.length;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              fechaStr,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: _kNavy,
+              ),
+            ),
+          ),
+          if (count > 0)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: _kPrimary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '$count evento${count > 1 ? 's' : ''}',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: _kPrimary,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  // ================= ESTADO VACÍO =================
+  Widget _buildEmptyState(BuildContext context) {
+    return SizedBox(
+      height: 200,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.calendar_month_rounded, size: 48, color: Colors.grey.shade400),
+            const SizedBox(height: 12),
+            Text(
+              'No hay eventos para este día',
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ================= CARD DE EVENTO =================
+  Widget _buildEventoCard(BuildContext context, Evento evento) {
+    final bool entradaOk = evento.asistenciaRegistrada;
+    final bool salidaOk  = evento.salidaRegistrada;
+    final bool salidaHabilitada = entradaOk && !salidaOk;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE0E6EF), width: 0.5),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Título + badge hora
+            // Título + badge estado
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: Text(
                     evento.titulo,
-                    style: TextStyle(
-                      fontSize: 15,
+                    style: const TextStyle(
+                      fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: colorScheme.onSurface, // ✅
+                      color: _kNavy,
                     ),
                   ),
                 ),
+                const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: _kPrimary.withOpacity(0.1),
+                    color: entradaOk
+                        ? const Color(0xFFEAF3DE)
+                        : const Color(0xFFE6F1FB),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    evento.hora,
-                    style: const TextStyle(
-                      fontSize: 12,
+                    entradaOk ? 'Asistido' : 'Pendiente',
+                    style: TextStyle(
+                      fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: _kPrimary,
+                      color: entradaOk ? const Color(0xFF3A7D0A) : _kPrimary,
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
+
+            // Hora
+            Row(
+              children: [
+                Icon(Icons.access_time_rounded, size: 14, color: Colors.grey.shade500),
+                const SizedBox(width: 5),
+                Text(
+                  evento.hora,
+                  style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
 
             // Lugar + ver mapa
             Row(
               children: [
-                Icon(
-                  Icons.place_rounded,
-                  size: 15,
-                  color: colorScheme.onSurface.withOpacity(0.5),
-                ),
-                const SizedBox(width: 4),
+                Icon(Icons.place_rounded, size: 14, color: Colors.grey.shade500),
+                const SizedBox(width: 5),
                 Expanded(
                   child: Text(
                     evento.lugar,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: colorScheme.onSurface.withOpacity(0.6),
-                    ), // ✅
+                    style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
                   ),
                 ),
                 GestureDetector(
                   onTap: () => _abrirMapa(evento),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(Icons.map_rounded, size: 15, color: _kPrimary),
-                      SizedBox(width: 4),
+                      Icon(Icons.map_rounded, size: 14, color: _kPrimary),
+                      const SizedBox(width: 4),
                       Text(
                         'Ver mapa',
                         style: TextStyle(
@@ -474,6 +547,7 @@ class _EventosTabState extends State<EventosTab> {
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           decoration: TextDecoration.underline,
+                          decorationColor: _kPrimary,
                         ),
                       ),
                     ],
@@ -482,72 +556,59 @@ class _EventosTabState extends State<EventosTab> {
               ],
             ),
             const SizedBox(height: 14),
+            const Divider(height: 1, thickness: 0.5, color: Color(0xFFE0E6EF)),
+            const SizedBox(height: 12),
 
             // Botones entrada / salida
             Row(
               children: [
                 Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: evento.asistenciaRegistrada
-                        ? null
-                        : () => registrarEntradaEvento(evento),
-                    icon: Icon(
-                      evento.asistenciaRegistrada
-                          ? Icons.check_circle_rounded
-                          : Icons.login_rounded,
-                      size: 16,
-                    ),
-                    label: Text(
-                      evento.asistenciaRegistrada
-                          ? 'Entrada registrada'
-                          : 'Registrar entrada',
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _kEntrada, // ✅ verde
-                      foregroundColor: Colors.white,
-                      disabledBackgroundColor: _kEntrada.withOpacity(0.3),
-                      disabledForegroundColor: Colors.white54,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                  child: SizedBox(
+                    height: 40,
+                    child: ElevatedButton.icon(
+                      onPressed: entradaOk ? null : () => registrarEntradaEvento(evento),
+                      icon: Icon(
+                        entradaOk ? Icons.check_circle_rounded : Icons.login_rounded,
+                        size: 15,
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      textStyle: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                      label: Text(entradaOk ? 'Entrada registrada' : 'Registrar entrada'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _kPrimary,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: const Color(0xFFF4F6FA),
+                        disabledForegroundColor: Colors.grey.shade500,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                        elevation: 0,
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed:
-                        evento.salidaRegistrada || !evento.asistenciaRegistrada
-                        ? null
-                        : () => registrarSalidaEvento(evento),
-                    icon: Icon(
-                      evento.salidaRegistrada
-                          ? Icons.check_circle_rounded
-                          : Icons.logout_rounded,
-                      size: 16,
-                    ),
-                    label: Text(
-                      evento.salidaRegistrada
-                          ? 'Salida registrada'
-                          : 'Registrar salida',
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _kSalida, // ✅ rojo
-                      foregroundColor: Colors.white,
-                      disabledBackgroundColor: _kSalida.withOpacity(0.3),
-                      disabledForegroundColor: Colors.white54,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                  child: SizedBox(
+                    height: 40,
+                    child: ElevatedButton.icon(
+                      onPressed: salidaHabilitada ? () => registrarSalidaEvento(evento) : null,
+                      icon: Icon(
+                        salidaOk ? Icons.check_circle_rounded : Icons.logout_rounded,
+                        size: 15,
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      textStyle: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                      label: Text(salidaOk ? 'Salida registrada' : 'Registrar salida'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFCEBEB),
+                        foregroundColor: const Color(0xFF791F1F),
+                        disabledBackgroundColor: const Color(0xFFF4F6FA),
+                        disabledForegroundColor: Colors.grey.shade500,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                        elevation: 0,
                       ),
                     ),
                   ),
@@ -561,6 +622,7 @@ class _EventosTabState extends State<EventosTab> {
   }
 }
 
+// ================= MODAL MAPA =================
 class _MapaModal extends StatelessWidget {
   final double latitud;
   final double longitud;
@@ -574,13 +636,13 @@ class _MapaModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final punto = LatLng(latitud, longitud);
-    final cardColor = Theme.of(context).cardColor; // ✅
+    final punto     = LatLng(latitud, longitud);
+    final cardColor = Theme.of(context).cardColor;
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
       decoration: BoxDecoration(
-        color: cardColor, // ✅
+        color: cardColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
@@ -606,7 +668,7 @@ class _MapaModal extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: Theme.of(context).colorScheme.onSurface, // ✅
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -623,15 +685,12 @@ class _MapaModal extends StatelessWidget {
           ),
           Expanded(
             child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                bottom: Radius.circular(24),
-              ),
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
               child: FlutterMap(
                 options: MapOptions(initialCenter: punto, initialZoom: 16),
                 children: [
                   TileLayer(
-                    urlTemplate:
-                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     userAgentPackageName: 'com.example.hola',
                   ),
                   MarkerLayer(
@@ -640,11 +699,7 @@ class _MapaModal extends StatelessWidget {
                         point: punto,
                         width: 60,
                         height: 60,
-                        child: const Icon(
-                          Icons.location_pin,
-                          color: _kSalida,
-                          size: 48,
-                        ),
+                        child: const Icon(Icons.location_pin, color: _kSalida, size: 48),
                       ),
                     ],
                   ),
