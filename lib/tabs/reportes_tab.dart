@@ -68,13 +68,20 @@ class _ReportesTabState extends State<ReportesTab> {
       final resList = results[0];
       final resResumen = results[1];
 
+      print('📋 Asistencias status: ${resList.statusCode}');
+      print('📊 Resumen status: ${resResumen.statusCode}');
       if (resList.statusCode == 200 && resResumen.statusCode == 200) {
         final todas = List<dynamic>.from(jsonDecode(resList.body));
+        final resumenData = jsonDecode(resResumen.body) as Map<String, dynamic>;
         setState(() {
           _asistencias = todas.where((a) => a['hora_salida'] != null).toList();
-          _resumen = jsonDecode(resResumen.body);
+          _resumen = resumenData;
         });
+        print('✅ Asistencias: ${_asistencias.length}');
+        print('✅ Resumen: $_resumen');
       } else {
+        print('❌ Error asistencias: ${resList.statusCode} - ${resList.body}');
+        print('❌ Error resumen: ${resResumen.statusCode} - ${resResumen.body}');
         setState(() => _error = 'Error al cargar los datos');
       }
     } catch (e) {
@@ -481,9 +488,10 @@ class _ReportesTabState extends State<ReportesTab> {
           ),
         ],
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
           Container(
             width: 4,
             decoration: BoxDecoration(
@@ -570,7 +578,8 @@ class _ReportesTabState extends State<ReportesTab> {
               ),
             ),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }
